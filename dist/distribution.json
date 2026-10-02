@@ -1,0 +1,43 @@
+﻿{
+    "schemaVersion":  1,
+    "id":  "natural-regrowth",
+    "name":  "Stranded Deep Natural Regrowth",
+    "version":  "0.2.0",
+    "artifactBaseName":  "StrandedDeepNaturalRegrowth",
+    "type":  "mod",
+    "category":  "world",
+    "description":  "Natural palm and coconut regrowth system.",
+    "packagePaths":  [
+                         "BepInEx/plugins/StrandedDeepNaturalRegrowth"
+                     ],
+    "ownedPaths":  [
+                       "BepInEx/plugins/StrandedDeepNaturalRegrowth"
+                   ],
+    "install":  {
+                    "restartRequired":  true
+                },
+    "dependencies":  [
+                         {
+                             "id":  "bepinex",
+                             "required":  true
+                         }
+                     ],
+    "optionalDependencies":  [
+
+                             ],
+    "conflicts":  [
+
+                  ],
+    "persistence":  {
+                        "usesBepInExConfig":  true,
+                        "usesGameSave":  true,
+                        "usesSidecarData":  true,
+                        "backupBeforeUpdate":  true
+                    },
+    "publishing":  {
+                       "repository":  "stranded-deep-natural-regrowth",
+                       "tag":  "v0.2.0",
+                       "releaseChannel":  "stable"
+                   },
+    "bepInExGuid":  "com.bamex.strandeddeep.naturalregrowth"
+}
