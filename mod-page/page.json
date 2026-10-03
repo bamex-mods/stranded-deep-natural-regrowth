@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "natural-regrowth",
+  "defaultLocale": "en",
+  "locales": {
+    "en": "en.json",
+    "ru": "ru.json"
+  },
+  "media": {
+    "cover": "media/cover.jpg",
+    "screenshots": []
+  },
+  "tags": [
+    "regrowth",
+    "renewable",
+    "world_simulation",
+    "persistence",
+    "split_screen"
+  ],
+  "highlights": [
+    "regrowth",
+    "renewable",
+    "world_simulation"
+  ]
+}

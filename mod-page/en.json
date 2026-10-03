@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "subtitle": "Slow natural recovery of palms and coconuts for long games.",
+  "description": "Adds slow natural recovery for palm ecology and coconuts so long-term survival does not turn island resources into permanently exhausted one-time supplies.",
+  "features": [
+    "Real palm trees participate in a shared world population model.",
+    "Empty palms can naturally produce coconuts again after long in-game periods.",
+    "Coconut recovery works for both native world palms and managed palms created by the mod.",
+    "Decorative YOUNG_PALM harvest plants are not treated as full tree stages.",
+    "Local split-screen uses one shared ecology for both players rather than per-player state.",
+    "The ecology model accounts for unloaded islands and supports game-time catch-up.",
+    "Mod state is persisted separately and restored with the corresponding game world."
+  ],
+  "screenshotCaptions": {},
+  "faq": [
+    {
+      "question": "Does this turn palms into fast farms?",
+      "answer": "No. The goal is rare long-term natural recovery, not a constant guaranteed resource stream."
+    },
+    {
+      "question": "Does each split-screen player have a separate ecology?",
+      "answer": "No. Both players share the same world ecology."
+    },
+    {
+      "question": "Do YOUNG_PALM plants count as tree stages?",
+      "answer": "No. The mod distinguishes the harvest plants from the real PALM_1–PALM_4 tree stages."
+    },
+    {
+      "question": "What happens on unloaded islands?",
+      "answer": "The mod keeps an ecology model and applies game-time catch-up when needed."
+    },
+    {
+      "question": "Where is the extra state stored?",
+      "answer": "In a separate mod persistence sidecar associated with the game world/save."
+    }
+  ],
+  "changelog": []
+}
