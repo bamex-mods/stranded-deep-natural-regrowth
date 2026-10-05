@@ -2,7 +2,7 @@
     "schemaVersion":  1,
     "id":  "natural-regrowth",
     "name":  "Stranded Deep Natural Regrowth",
-    "version":  "0.2.0",
+    "version":  "0.2.2",
     "artifactBaseName":  "StrandedDeepNaturalRegrowth",
     "type":  "mod",
     "category":  "world",
@@ -23,7 +23,10 @@
                          }
                      ],
     "optionalDependencies":  [
-
+                                 {
+                                     "id":  "mod-settings",
+                                     "minimumVersion":  "0.3.1"
+                                 }
                              ],
     "conflicts":  [
 
@@ -36,7 +39,7 @@
                     },
     "publishing":  {
                        "repository":  "stranded-deep-natural-regrowth",
-                       "tag":  "v0.2.0",
+                       "tag":  "v0.2.2",
                        "releaseChannel":  "stable"
                    },
     "bepInExGuid":  "com.bamex.strandeddeep.naturalregrowth"

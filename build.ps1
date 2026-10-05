@@ -1,6 +1,12 @@
+param(
+    [string]$GameRoot = $env:STRANDED_DEEP_GAME_ROOT
+)
+
 $ErrorActionPreference = "Stop"
 
-$GameRoot = "F:\SteamLibrary\steamapps\common\Stranded Deep"
+if ([string]::IsNullOrWhiteSpace($GameRoot)) {
+    throw "GameRoot was not supplied. Pass -GameRoot or set STRANDED_DEEP_GAME_ROOT."
+}
 $Managed = Join-Path $GameRoot "Stranded_Deep_Data\Managed"
 $BepInExCore = Join-Path $GameRoot "BepInEx\core"
 $Plugins = Join-Path $GameRoot "BepInEx\plugins"
@@ -12,6 +18,7 @@ $Sources = @(
     (Join-Path $PSScriptRoot "NaturalRegrowthModel.cs"),
     (Join-Path $PSScriptRoot "NaturalRegrowthPersistence.cs"),
     (Join-Path $PSScriptRoot "NaturalRegrowthClock.cs"),
+    (Join-Path $PSScriptRoot "SDK\ModSettingsClient.cs"),
     (Join-Path $PSScriptRoot "NaturalRegrowthPlugin.cs")
 )
 
@@ -111,6 +118,6 @@ if (Test-Path $ConfigFile) {
 }
 
 Write-Host ""
-Write-Host "Build OK - Natural Regrowth v0.2.0 production clean:"
+Write-Host "Build OK - Natural Regrowth v0.2.2 bilingual Mod Settings release:"
 Write-Host $Output
 Write-Host "Diagnostics/hotkeys/probe files are not part of this build."

@@ -13,7 +13,8 @@ using UnityEngine;
 
 namespace StrandedDeepNaturalRegrowth
 {
-    [BepInPlugin("com.bamex.strandeddeep.naturalregrowth", "Stranded Deep Natural Regrowth", "0.2.0")]
+    [BepInPlugin("com.bamex.strandeddeep.naturalregrowth", "Stranded Deep Natural Regrowth", "0.2.2")]
+    [BepInDependency("com.bamex.strandeddeep.modsettings", BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class NaturalRegrowthPlugin : BaseUnityPlugin
     {
         internal static NaturalRegrowthPlugin Instance;
@@ -94,8 +95,9 @@ namespace StrandedDeepNaturalRegrowth
         {
             Instance = this;
             BindConfig();
+            RegisterModSettings();
             PatchGame();
-            Logger.LogInfo("Natural Regrowth v0.2.0 loaded.");
+            Logger.LogInfo("Natural Regrowth v0.2.2 loaded.");
             Logger.LogInfo("Real palm stages: PALM_4(160) -> PALM_3(159) -> PALM_2(158) -> PALM_1(157).");
             Logger.LogInfo("Managed palms are excluded from native palm Save(); ecology persists in a per-world sidecar on native SaveGame().");
             Logger.LogInfo("Zone reconciliation is gated by gameplay PlayerCamera occupancy, not SaveContainer.activeInHierarchy; palm death also requires a nearby gameplay camera.");
@@ -132,6 +134,212 @@ namespace StrandedDeepNaturalRegrowth
             _coconutOneWeight = Config.Bind("Coconuts", "OneCoconutWeight", 88.0f, "Relative weight for 1 coconut after a successful regrowth check.");
             _coconutTwoWeight = Config.Bind("Coconuts", "TwoCoconutWeight", 11.0f, "Relative weight for 2 coconuts after a successful regrowth check.");
             _coconutThreeWeight = Config.Bind("Coconuts", "ThreeCoconutWeight", 1.0f, "Relative weight for 3 coconuts after a successful regrowth check.");
+        }
+
+        private void RegisterModSettings()
+        {
+            try
+            {
+                const string modId = "naturalregrowth";
+                bool registered = Bamex.StrandedDeep.ModSettings.ModSettingsClient.RegisterModLocalized(
+                    modId,
+                    "ПРИРОДНОЕ ВОССТАНОВЛЕНИЕ",
+                    "NATURAL REGROWTH",
+                    600);
+
+                if (!registered)
+                {
+                    Logger.LogInfo("StrandedDeepModSettings is not available; Natural Regrowth will continue using its BepInEx config only.");
+                    return;
+                }
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddToggleLocalized(
+                    modId,
+                    "palm_reproduction",
+                    "Размножение пальм",
+                    "Palm Reproduction",
+                    100,
+                    "Вкл.",
+                    "ON",
+                    "Выкл.",
+                    "OFF",
+                    delegate { return _reproductionEnabled.Value; },
+                    delegate(bool value) { _reproductionEnabled.Value = value; });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddSliderLocalized(
+                    modId,
+                    "palm_recovery_speed",
+                    "Скорость восстановления пальм",
+                    "Palm Regrowth Speed",
+                    110,
+                    0.25f,
+                    2.00f,
+                    0.25f,
+                    100.0f,
+                    "%",
+                    "%",
+                    0,
+                    delegate
+                    {
+                        return Mathf.Clamp(_baseDailyBirthChance.Value / 0.035f, 0.25f, 2.0f);
+                    },
+                    delegate(float multiplier)
+                    {
+                        multiplier = Mathf.Clamp(multiplier, 0.25f, 2.0f);
+                        _baseDailyBirthChance.Value = 0.035f * multiplier;
+                    });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddSliderLocalized(
+                    modId,
+                    "palm_growth_days",
+                    "Рост пальмы до взрослой",
+                    "Palm Growth to Maturity",
+                    120,
+                    20.0f,
+                    100.0f,
+                    5.0f,
+                    1.0f,
+                    " дн.",
+                    " days",
+                    0,
+                    delegate
+                    {
+                        return Mathf.Clamp(_growthPalm1Days.Value, 20.0f, 100.0f);
+                    },
+                    delegate(float adultDays)
+                    {
+                        SetPalmGrowthDays(adultDays);
+                    });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddToggleLocalized(
+                    modId,
+                    "coconut_regrowth",
+                    "Восстановление кокосов",
+                    "Coconut Regrowth",
+                    200,
+                    "Вкл.",
+                    "ON",
+                    "Выкл.",
+                    "OFF",
+                    delegate { return _coconutRegrowthEnabled.Value; },
+                    delegate(bool value) { _coconutRegrowthEnabled.Value = value; });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddSliderLocalized(
+                    modId,
+                    "coconut_min_days",
+                    "Минимум ожидания кокосов",
+                    "Minimum Coconut Regrowth Delay",
+                    210,
+                    5.0f,
+                    60.0f,
+                    5.0f,
+                    1.0f,
+                    " дн.",
+                    " days",
+                    0,
+                    delegate { return (float)_coconutMinDays.Value; },
+                    delegate(float value) { SetCoconutMinDays(value); });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddSliderLocalized(
+                    modId,
+                    "coconut_max_days",
+                    "Максимум ожидания кокосов",
+                    "Maximum Coconut Regrowth Delay",
+                    220,
+                    5.0f,
+                    60.0f,
+                    5.0f,
+                    1.0f,
+                    " дн.",
+                    " days",
+                    0,
+                    delegate { return (float)_coconutMaxDays.Value; },
+                    delegate(float value) { SetCoconutMaxDays(value); });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddSliderLocalized(
+                    modId,
+                    "coconut_success_chance",
+                    "Шанс урожая кокосов",
+                    "Coconut Crop Chance",
+                    230,
+                    0.05f,
+                    1.00f,
+                    0.05f,
+                    100.0f,
+                    "%",
+                    "%",
+                    0,
+                    delegate { return Mathf.Clamp(_coconutSuccessChance.Value, 0.05f, 1.0f); },
+                    delegate(float value) { _coconutSuccessChance.Value = Mathf.Clamp(value, 0.05f, 1.0f); });
+
+                Bamex.StrandedDeep.ModSettings.ModSettingsClient.AddButtonLocalized(
+                    modId,
+                    "reset_nature",
+                    "Сбросить настройки природы",
+                    "Reset Nature Settings",
+                    900,
+                    "СБРОСИТЬ",
+                    "RESET",
+                    delegate { ResetUserFacingNatureSettings(); });
+
+                Logger.LogInfo("Registered Natural Regrowth settings in StrandedDeepModSettings.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning("Could not register Natural Regrowth settings UI: " + ex.Message);
+            }
+        }
+
+        private void SetPalmGrowthDays(float adultDays)
+        {
+            adultDays = Mathf.Clamp(adultDays, 20.0f, 100.0f);
+            _growthPalm1Days.Value = adultDays;
+            _growthPalm3Days.Value = adultDays * (17.0f / 50.0f);
+            _growthPalm2Days.Value = adultDays * (34.0f / 50.0f);
+        }
+
+        private void SetCoconutMinDays(float value)
+        {
+            int days = Mathf.Clamp(Mathf.RoundToInt(value), 5, 60);
+            _coconutMinDays.Value = days;
+            if (_coconutMaxDays.Value < days)
+                _coconutMaxDays.Value = days;
+        }
+
+        private void SetCoconutMaxDays(float value)
+        {
+            int days = Mathf.Clamp(Mathf.RoundToInt(value), 5, 60);
+            _coconutMaxDays.Value = days;
+            if (_coconutMinDays.Value > days)
+                _coconutMinDays.Value = days;
+        }
+
+        private void ResetUserFacingNatureSettings()
+        {
+            _reproductionEnabled.Value = true;
+            _baseDailyBirthChance.Value = 0.035f;
+
+            _growthPalm3Days.Value = 17.0f;
+            _growthPalm2Days.Value = 34.0f;
+            _growthPalm1Days.Value = 50.0f;
+
+            _coconutRegrowthEnabled.Value = true;
+            _coconutMinDays.Value = 15;
+            _coconutMaxDays.Value = 25;
+            _coconutSuccessChance.Value = 0.15f;
+            _coconutOneWeight.Value = 88.0f;
+            _coconutTwoWeight.Value = 11.0f;
+            _coconutThreeWeight.Value = 1.0f;
+
+            try
+            {
+                Config.Save();
+            }
+            catch
+            {
+            }
+
+            Logger.LogInfo("Natural Regrowth user-facing nature settings reset to production defaults.");
         }
 
         private void PatchGame()
